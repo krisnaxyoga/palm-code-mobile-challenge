@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:palmmobilechalenge/shared/theme.dart';
 import 'package:palmmobilechalenge/ui/widgets/form.dart';
@@ -15,11 +16,25 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<Book>> futureBooks;
   String searchQuery = '';
+  final ApiService _apiService = ApiService();
+  int _selectedIndex = 0;
+
+  Future<List<Book>> _loadBooks() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult == ConnectivityResult.none) {
+      // Jika tidak ada koneksi internet, langsung ambil dari local storage
+      return _apiService.getBooksFromLocal();
+    } else {
+      // Jika ada koneksi internet, ambil dari API dan fallback ke local storage jika gagal
+      return _apiService.fetchBooksWithFallback();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    futureBooks = ApiService().fetchBooks();
+    futureBooks = _loadBooks();
   }
 
   void updateSearchQuery(String newQuery) {
@@ -39,6 +54,19 @@ class _HomePageState extends State<HomePage> {
                   .toLowerCase()
                   .contains(searchQuery.toLowerCase()))
           .toList();
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+      // Action for 'Home'
+      Navigator.pushNamed(context, '/home-page');
+    } else if (index == 1) {
+      // Action for 'Likes'
+      Navigator.pushNamed(context, '/likes');
     }
   }
 
@@ -66,7 +94,6 @@ class _HomePageState extends State<HomePage> {
               icon: Image.asset(
                 'assets/home.png',
                 width: 20,
-                color: blueColor,
               ),
               label: 'Home',
             ),
@@ -78,9 +105,10 @@ class _HomePageState extends State<HomePage> {
               label: 'Likes',
             ),
           ],
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -131,8 +159,7 @@ class _HomePageState extends State<HomePage> {
                         return HomeBookCard(
                           title: book.title,
                           subtitle: book.authors[0]['name'],
-                          imageUrl: book.formats['image/jpeg'] ??
-                              '', // Atur URL gambar sesuai dengan data Anda
+                          imageUrl: book.formats['image/jpeg'] ?? '',
                           onTap: () {
                             Navigator.pushNamed(context, '/detail-book',
                                 arguments: book);

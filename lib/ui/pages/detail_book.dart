@@ -1,50 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert'; // For JSON encoding and decoding
 import 'package:palmmobilechalenge/shared/theme.dart';
 import 'package:palmmobilechalenge/model/book.dart';
 
-class DetailBook extends StatelessWidget {
+class DetailBook extends StatefulWidget {
   const DetailBook({super.key});
+
+  @override
+  State<DetailBook> createState() => _DetailBookState();
+}
+
+class _DetailBookState extends State<DetailBook> {
+  Future<void> _saveFavoriteBook(Book book) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> favoriteBooks = prefs.getStringList('favoriteBooks') ?? [];
+    favoriteBooks.add(jsonEncode(book.toJson()));
+    await prefs.setStringList('favoriteBooks', favoriteBooks);
+  }
 
   @override
   Widget build(BuildContext context) {
     final Book book = ModalRoute.of(context)!.settings.arguments as Book;
 
     return Scaffold(
-      backgroundColor: blueColor,
-      bottomNavigationBar: BottomAppBar(
-        color: whiteColor,
-        elevation: 0,
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          backgroundColor: whiteColor,
-          selectedItemColor: blueColor,
-          unselectedItemColor: blackColor,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          selectedLabelStyle:
-              blueTextStyle.copyWith(fontSize: 10, fontWeight: medium),
-          unselectedLabelStyle:
-              blackTextStyle.copyWith(fontSize: 10, fontWeight: medium),
-          items: [
-            BottomNavigationBarItem(
-              icon: Image.asset(
-                'assets/home.png',
-                width: 20,
-                color: blueColor,
-              ),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset(
-                'assets/social_network.png',
-                width: 20,
-              ),
-              label: 'Likes',
-            ),
-          ],
-        ),
-      ),
+      backgroundColor: lightBackgroundColor,
       body: SingleChildScrollView(
         child: Center(
           child: Column(
@@ -52,60 +32,62 @@ class DetailBook extends StatelessWidget {
               const SizedBox(
                 height: 54,
               ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: whiteColor,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(50),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(60),
+                  decoration: BoxDecoration(
+                    color: purpleColor,
+                    borderRadius: BorderRadius.circular(50),
                   ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      book.coverImageUrl,
-                      height: 250,
-                      fit: BoxFit.cover,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      book.title,
-                      style: TextStyle(
-                        color: blueColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.network(
+                        book.coverImageUrl ?? 'assets/img_logo_dark.png',
+                        height: 250,
+                        fit: BoxFit.cover,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      book.authors[0]['name'],
-                      style: TextStyle(
-                        color: blackColor,
-                        fontSize: 16,
+                      const SizedBox(height: 20),
+                      Text(
+                        book.title,
+                        style: whiteTextStyle.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      book.subjects[0],
-                      style: greyTextStyle.copyWith(fontSize: 12),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    IconButton(
-                      icon: Icon(Icons.favorite_border),
-                      color: blueColor,
-                      onPressed: () {
-                        // Add like functionality here
-                      },
-                    ),
-                    const SizedBox(
-                      height: 50,
-                    )
-                  ],
+                      const SizedBox(height: 10),
+                      Text(
+                        book.authors[0]['name'],
+                        style: whiteTextStyle.copyWith(
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        book.subjects[0],
+                        style: whiteTextStyle.copyWith(
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      IconButton(
+                        icon: Icon(Icons.favorite_border),
+                        color: redColor,
+                        iconSize: 50,
+                        onPressed: () {
+                          _saveFavoriteBook(book);
+                        },
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      )
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -113,5 +95,16 @@ class DetailBook extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+extension BookJson on Book {
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'coverImageUrl': coverImageUrl,
+      'authors': authors,
+      'subjects': subjects,
+    };
   }
 }

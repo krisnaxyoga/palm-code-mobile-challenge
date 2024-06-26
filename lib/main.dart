@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:palmmobilechalenge/shared/theme.dart';
 import 'package:palmmobilechalenge/ui/pages/detail_book.dart';
 import 'package:palmmobilechalenge/ui/pages/home_page.dart';
+import 'package:palmmobilechalenge/ui/pages/likes_page.dart';
 import 'package:palmmobilechalenge/ui/pages/onboarding_page.dart';
 import 'package:palmmobilechalenge/ui/pages/splash_page.dart';
 
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         '/oboarding': (context) => const OnboardingPage(),
         '/home-page': (context) => const HomePage(),
         '/detail-book': (context) => const DetailBook(),
+        '/likes': (context) => const LikesPage(),
       },
     );
   }
