@@ -14,15 +14,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
   int currentIndex = 0;
   CarouselController carouselController = CarouselController();
   List<String> titles = [
-    'Grow Your \n Financial Today',
-    'Build From\n Zero to Freedom',
-    'Start Together'
+    'Welcome in My App!',
+    'User experience matters.',
+    'i am dedicated'
   ];
 
   List<String> subtitles = [
-    'Our system is helping you to \n achieve a better goal',
-    'We provide tips for you so that\nyou can adapt easier',
-    'We will guide you to where\nyou wanted it too'
+    'I am appreciate your \n valuable feedback on our app',
+    'Your input is \n crucial for us',
+    'to enhancing our app \n based on your feedback.'
   ];
 
   @override

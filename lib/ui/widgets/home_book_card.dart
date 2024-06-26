@@ -7,14 +7,15 @@ class HomeBookCard extends StatelessWidget {
   final String imageUrl;
   final bool isSelected;
   final VoidCallback? onTap;
+
   const HomeBookCard({
-    super.key,
+    Key? key, // Perbaiki deklarasi key
     required this.title,
     required this.subtitle,
     required this.imageUrl,
     this.onTap,
     this.isSelected = false,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,27 +45,37 @@ class HomeBookCard extends StatelessWidget {
                     width: 50, height: 50);
               },
             ),
-            const Spacer(),
-            Column(
-              children: [
-                Text(
-                  title,
-                  style: blackTextStyle.copyWith(
-                    fontWeight: medium,
-                    fontSize: 14,
+            const SizedBox(
+              width: 14,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: blackTextStyle.copyWith(
+                      fontWeight: semiBold,
+                      fontSize: 14,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 2,
                   ),
-                ),
-                const SizedBox(
-                  height: 2,
-                ),
-                Text(
-                  subtitle,
-                  style: greyTextStyle.copyWith(
-                    fontSize: 12,
+                  const SizedBox(
+                    height: 2,
                   ),
-                ),
-              ],
-            )
+                  Text(
+                    subtitle,
+                    style: greyTextStyle.copyWith(
+                      fontWeight: medium,
+                      fontSize: 12,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 2,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
