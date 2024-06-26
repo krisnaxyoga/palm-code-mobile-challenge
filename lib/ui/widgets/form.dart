@@ -5,12 +5,14 @@ class CustomsFormField extends StatelessWidget {
   final String title;
   final bool obscureText;
   final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
 
   const CustomsFormField({
     super.key,
     required this.title,
     this.obscureText = false,
     this.controller,
+    this.onChanged,
   });
 
   @override
@@ -31,6 +33,7 @@ class CustomsFormField extends StatelessWidget {
         TextFormField(
           obscureText: obscureText,
           controller: controller,
+          onChanged: onChanged,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search), // Add the search icon here
             border: OutlineInputBorder(

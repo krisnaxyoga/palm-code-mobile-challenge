@@ -14,6 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<List<Book>> futureBooks;
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -21,10 +22,30 @@ class _HomePageState extends State<HomePage> {
     futureBooks = ApiService().fetchBooks();
   }
 
+  void updateSearchQuery(String newQuery) {
+    setState(() {
+      searchQuery = newQuery;
+    });
+  }
+
+  List<Book> filterBooks(List<Book> books) {
+    if (searchQuery.isEmpty) {
+      return books;
+    } else {
+      return books
+          .where((book) =>
+              book.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
+              book.authors[0]['name']
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()))
+          .toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightBackgroundColor,
+      backgroundColor: blueColor,
       bottomNavigationBar: BottomAppBar(
         color: whiteColor,
         elevation: 0,
@@ -61,25 +82,35 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 30,
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 22,
+                vertical: 40,
               ),
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: whiteColor,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(50),
                 ),
-                child: CustomsFormField(title: 'search'),
+                color: whiteColor,
               ),
-              const SizedBox(
-                height: 30,
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  CustomsFormField(
+                    title: 'search',
+                    onChanged: updateSearchQuery,
+                  ),
+                ],
               ),
-              FutureBuilder<List<Book>>(
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: FutureBuilder<List<Book>>(
                 future: futureBooks,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -90,17 +121,18 @@ class _HomePageState extends State<HomePage> {
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(child: Text('No books found'));
                   } else {
+                    final filteredBooks = filterBooks(snapshot.data!);
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: snapshot.data!.length,
+                      itemCount: filteredBooks.length,
                       itemBuilder: (context, index) {
-                        final book = snapshot.data![index];
+                        final book = filteredBooks[index];
                         return HomeBookCard(
                           title: book.title,
-                          subtitle: book.authors.join(', '),
-                          imageUrl:
-                              'assets/img_logo_dark.png', // Atur URL gambar sesuai dengan data Anda
+                          subtitle: book.authors[0]['name'],
+                          imageUrl: book.formats['image/jpeg'] ??
+                              '', // Atur URL gambar sesuai dengan data Anda
                           onTap: () {
                             Navigator.pushNamed(context, '/detail-book',
                                 arguments: book);
@@ -111,8 +143,8 @@ class _HomePageState extends State<HomePage> {
                   }
                 },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
