@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/home-page': (context) => const HomePage(),
         '/detail-book': (context) => const DetailBook(),
         '/likes': (context) => const LikesPage(),
+        // '/ss': (context) => const ExamplePage(),
       },
     );
   }

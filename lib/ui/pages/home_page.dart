@@ -94,6 +94,7 @@ class _HomePageState extends State<HomePage> {
               icon: Image.asset(
                 'assets/home.png',
                 width: 20,
+                color: _selectedIndex == 0 ? blueColor : blackColor,
               ),
               label: 'Home',
             ),
@@ -101,6 +102,7 @@ class _HomePageState extends State<HomePage> {
               icon: Image.asset(
                 'assets/social_network.png',
                 width: 20,
+                color: _selectedIndex == 1 ? blueColor : blackColor,
               ),
               label: 'Likes',
             ),
@@ -126,8 +128,15 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Column(
                 children: [
+                  Container(
+                    width: 155,
+                    height: 50,
+                    decoration: const BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage('assets/img_logo_dark.png'))),
+                  ),
                   const SizedBox(
-                    height: 30,
+                    height: 20,
                   ),
                   CustomsFormField(
                     title: 'search',
