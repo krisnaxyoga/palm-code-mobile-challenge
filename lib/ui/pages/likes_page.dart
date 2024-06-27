@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:palmmobilechalenge/ui/pages/detail_book.dart';
+import 'package:palmmobilechalenge/ui/widgets/home_book_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // For JSON encoding and decoding
 import 'package:palmmobilechalenge/shared/theme.dart';
@@ -13,68 +15,101 @@ class LikesPage extends StatefulWidget {
 
 class _LikesPageState extends State<LikesPage> {
   late Future<List<Book>> _favoriteBooksFuture;
-
-  Future<List<Book>> _loadFavoriteBooks() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? favoriteBooksJson = prefs.getStringList('favoriteBooks');
-    if (favoriteBooksJson == null) {
-      return [];
-    }
-    return favoriteBooksJson
-        .map((bookJson) {
-          try {
-            return Book.fromJson(jsonDecode(bookJson));
-          } catch (e) {
-            // Log error and skip this entry if JSON parsing fails
-            print('Error parsing book JSON: $e');
-            return null;
-          }
-        })
-        .where((book) => book != null)
-        .toList()
-        .cast<Book>();
-  }
-
+  List<FavBook> _savedFavBooks = []; // List to hold favorite books
   @override
   void initState() {
     super.initState();
-    _favoriteBooksFuture = _loadFavoriteBooks();
+    // Load saved favorite books when the page initializes
+    _loadDataFromLocal();
+  }
+
+  Future<void> _loadDataFromLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> jsonList = prefs.getStringList('favoriteBooks') ?? [];
+    List<FavBook> loadedFavBooks = jsonList
+        .map((jsonString) => FavBook.fromJson(jsonDecode(jsonString)))
+        .toList();
+    setState(() {
+      _savedFavBooks = loadedFavBooks;
+    });
+  }
+
+  Future<void> _deleteFavoriteBook(FavBook favBook) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> jsonList = prefs.getStringList('favoriteBooks') ?? [];
+    jsonList.remove(jsonEncode(favBook.toJson())); // Remove from list
+    await prefs.setStringList('favoriteBooks', jsonList); // Save updated list
+
+    // Update UI
+    setState(() {
+      _savedFavBooks.remove(favBook); // Remove from local list
+    });
+
+    _showMessage('Book removed from favorites!');
+  }
+
+  void _showMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightBackgroundColor,
+      backgroundColor: blueColor,
       appBar: AppBar(
-        title: Text('Favorite Books'),
-        backgroundColor: purpleColor,
+        title: Text(
+          'Favorite Books',
+          style: blackTextStyle.copyWith(fontWeight: semiBold),
+        ),
+        backgroundColor: whiteColor,
       ),
-      body: FutureBuilder<List<Book>>(
-        future: _favoriteBooksFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-                child:
-                    Text('Failed to load favorite books: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No favorite books found'));
-          } else {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final book = snapshot.data![index];
-                return ListTile(
-                  leading: Image.network(
-                      book.coverImageUrl ?? 'assets/img_logo_dark.png'),
-                  title: Text(book.title),
-                  subtitle: Text(book.authors[0]['name']),
-                );
-              },
-            );
-          }
-        },
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: _savedFavBooks.isEmpty
+                  ? [
+                      const SizedBox(height: 20),
+                      Center(
+                        child: Text(
+                          'No favorite books yet.',
+                          style: blackTextStyle.copyWith(fontSize: 18),
+                        ),
+                      ),
+                    ]
+                  : _savedFavBooks
+                      .where((favBook) => favBook.isFavorite)
+                      .map((favBook) {
+                      return LikeCard(
+                        title: favBook.title,
+                        subtitle: favBook.authors[0]['name'],
+                        imageUrl:
+                            favBook.coverImageUrl ?? 'assets/img_logo_dark.png',
+                        onTap: () {
+                          _deleteFavoriteBook(favBook);
+                        },
+                      );
+                    }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
