@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:palmmobilechalenge/shared/theme.dart';
 import 'package:palmmobilechalenge/model/book.dart';
 
-// Define the FavBook model
 class FavBook {
   final String title;
   final String? coverImageUrl;
@@ -77,26 +76,25 @@ class _DetailBookState extends State<DetailBook> {
     // Get SharedPreferences instance
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> favoriteBooksJson = prefs.getStringList('favoriteBooks') ?? [];
+    List<FavBook> loadedFavBooks = favoriteBooksJson
+        .map((jsonString) => FavBook.fromJson(jsonDecode(jsonString)))
+        .toList();
 
-    // Convert FavBook to JSON and add/remove from the list
+    // Check if the book exists in loadedFavBooks and update its isFavorite
+    var existingBookIndex = loadedFavBooks.indexWhere((favBook) =>
+        favBook.title == _favBook.title && favBook.isFavorite == true);
+
     if (_isFavorite) {
-      favoriteBooksJson.add(jsonEncode(favBook.toJson()));
+      // Add the book to favorites
+      favoriteBooksJson.add(jsonEncode(_favBook.toJson()));
     } else {
-      var index = favoriteBooksJson.indexWhere((jsonString) {
-        var decoded = jsonDecode(jsonString);
-        return decoded['title'] == favBook.title;
-      });
-
-      if (index != -1) {
-        var decoded = jsonDecode(favoriteBooksJson[index]);
-        decoded['isFavorite'] = false;
-        favoriteBooksJson[index] = jsonEncode(decoded);
+      // Remove the book from favorites
+      if (existingBookIndex != -1) {
+        loadedFavBooks[existingBookIndex].isFavorite = false;
+        favoriteBooksJson = loadedFavBooks
+            .map((favBook) => jsonEncode(favBook.toJson()))
+            .toList();
       }
-
-      print('${favBook.isFavorite}');
-      // Update local FavBook object's isFavorite
-      // Set isFavorite to false locally
-      _favBook.isFavorite = false;
     }
 
     // Save updated list to SharedPreferences
@@ -130,11 +128,11 @@ class _DetailBookState extends State<DetailBook> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Success'),
+          title: const Text('Success'),
           content: Text(message),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -157,6 +155,13 @@ class _DetailBookState extends State<DetailBook> {
     );
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Detail Books',
+          style: blackTextStyle.copyWith(fontWeight: semiBold),
+        ),
+        backgroundColor: lightBackgroundColor,
+      ),
       backgroundColor: blueColor,
       body: SingleChildScrollView(
         child: Center(
@@ -172,9 +177,9 @@ class _DetailBookState extends State<DetailBook> {
                     Container(
                       height: 450,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(40),
+                          topRight: Radius.circular(40),
                         ),
                         image: DecorationImage(
                           image: NetworkImage(
@@ -188,15 +193,14 @@ class _DetailBookState extends State<DetailBook> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: whiteColor,
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(20),
-                              // topRight: Radius.circular(20),
                             ),
                           ),
                           child: IconButton(
                             icon: _isFavorite
-                                ? Icon(Icons.favorite)
-                                : Icon(Icons.favorite_border),
+                                ? const Icon(Icons.favorite)
+                                : const Icon(Icons.favorite_border),
                             color: _isFavorite ? Colors.red : redColor,
                             iconSize: 50,
                             onPressed: () {
@@ -211,6 +215,7 @@ class _DetailBookState extends State<DetailBook> {
                         horizontal: 30,
                         vertical: 22,
                       ),
+                      width: double.infinity,
                       decoration: BoxDecoration(
                         color: whiteColor,
                       ),

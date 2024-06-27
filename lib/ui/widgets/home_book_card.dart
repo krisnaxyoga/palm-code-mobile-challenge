@@ -37,14 +37,20 @@ class HomeBookCard extends StatelessWidget {
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius:
+                  BorderRadius.circular(10), // Atur sesuai keinginan Anda
               child: Image.network(
                 imageUrl,
                 width: 50,
                 height: 50,
+                fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return Image.asset('assets/img_logo_dark.png',
-                      width: 50, height: 50);
+                  return Image.asset(
+                    'assets/img_logo_dark.png',
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  );
                 },
               ),
             ),
@@ -168,12 +174,13 @@ class LikeCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
             width: 10,
           ),
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
+            color: redColor,
             onPressed: onTap,
           ),
         ],

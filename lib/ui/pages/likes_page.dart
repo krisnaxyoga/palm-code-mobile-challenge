@@ -77,7 +77,7 @@ class _LikesPageState extends State<LikesPage> {
           'Favorite Books',
           style: blackTextStyle.copyWith(fontWeight: semiBold),
         ),
-        backgroundColor: whiteColor,
+        backgroundColor: lightBackgroundColor,
       ),
       body: ListView(
         children: [
