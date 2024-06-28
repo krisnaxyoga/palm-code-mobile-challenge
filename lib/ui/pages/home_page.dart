@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                 vertical: 40,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(
+                borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(50),
                 ),
                 color: whiteColor,
@@ -139,6 +139,7 @@ class _HomePageState extends State<HomePage> {
                     height: 20,
                   ),
                   CustomsFormField(
+                    isShowTitle: false,
                     title: 'search',
                     onChanged: updateSearchQuery,
                   ),
